@@ -3,7 +3,7 @@ Describe "Given the Advent of Code 2019 - Day 01" {
     BeforeAll {
         Push-Location $PSScriptRoot
 
-        # Source Deployment tools function
+        # Source functions
         . $(Resolve-Path ".\01.ps1")
         
         # Setting up Test data to Test Drive
