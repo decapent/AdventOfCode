@@ -20,9 +20,9 @@ Describe "Given the Advent of Code 2019 - Day 01" {
 
 
     Context "Part01 - When the required fuel calculation is computed" {
-        It "Computes the proper mass of the a module" {
+        It "Computes the proper mass of the modules" {
             # Arrange
-            $inputFilePath = Resolve-Path .\testdata1.txt
+            $inputFilePath = Resolve-Path .\testdata.txt
 
             # Act
             $totalFuel = Measure-RequiredFuel01 -InputFilePath $inputFilePath
@@ -33,6 +33,15 @@ Describe "Given the Advent of Code 2019 - Day 01" {
     } 
 
     Context "Part02 - When the required fuel calculation is computed" {
+        It "Computes recursively the proper mass of the modules" {
+            # Arrange
+            $inputFilePath = Resolve-Path .\testdata.txt
 
+            # Act
+            $totalFuel = Measure-RequiredFuel02 -InputFilePath $inputFilePath
+
+            # Assert
+            $totalFuel | Should -Be 51316
+        }
     }
 }
