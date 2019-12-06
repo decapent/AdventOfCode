@@ -7,31 +7,34 @@ function global:Invoke-IntCode {
 
     Write-Verbose "Loading IntCode in memory"
     $memory = Get-Content $ProgramInputPath | ForEach-Object { $_ -split "," }
+    
+    $shouldRun = $true
     $currentPos = 0
     
     do {
-        $shouldRun = $true
-
         Write-Verbose "Getting new Opcode"
         $seek = $currentPos + 3
         $opCode = $memory[$currentPos..$seek]
 
-        Write-Verbose "Obtaining operands"
-        $firstOperand = [int]::Parse($memory[$opCode[1]])
-        $secondOperand = [int]::Parse($memory[$opCode[2]])
-
         switch ($opCode[0]) {
             "1" {
                 Write-Verbose "Executing addition command"
-                $memory[$opCode[4]] = $firstOperand + $secondOperand
+                $firstOperand = [int]::Parse($memory[$opCode[1]])
+                $secondOperand = [int]::Parse($memory[$opCode[2]])
+                $memory[$opCode[3]] = $firstOperand + $secondOperand
+                break;
             }
             "2" {            
                 Write-Verbose "Executing multiplication command"
-                $memory[$opCode[4]] = $firstOperand * $secondOperand
+                $firstOperand = [int]::Parse($memory[$opCode[1]])
+                $secondOperand = [int]::Parse($memory[$opCode[2]])
+                $memory[$opCode[3]] = $firstOperand * $secondOperand
+                break;
             }
             "99" {
                 Write-Verbose "Time to finish and go home"
                 $shouldRun = $false
+                break;
             }
             default {
                 throw "Unsupported opCode operation!"
@@ -44,3 +47,5 @@ function global:Invoke-IntCode {
 
     return $memory
 }
+
+Invoke-IntCode -ProgramInputPath .\modifiedInput.txt -Verbose

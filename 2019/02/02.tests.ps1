@@ -19,9 +19,9 @@ Describe "Given the Advent of Code 2019 - Day 02" {
 
 
     Context "Part01 - When executing an IntCode program " {
-        BeforeEach {
-            $memoryDump = $null
-        }
+        # BeforeEach {
+        #     $memoryDump = $null
+        # }
 
         It "Throws if the program input path is invalid" {
             # Arrange
@@ -66,7 +66,7 @@ Describe "Given the Advent of Code 2019 - Day 02" {
             $memoryDump = Invoke-IntCode -ProgramInputPath $program
 
             # Assert
-            $memoryDump[0] | Should -Be 9
+            $memoryDump[0] | Should -Be 9801
         }
 
         It "Computes a simple program without corrupting the memory" {
@@ -74,9 +74,22 @@ Describe "Given the Advent of Code 2019 - Day 02" {
             $program = ".\simpleProgram.txt"
 
             # Act
+            $memoryDump = Invoke-IntCode -ProgramInputPath $program
 
             # Assert
-            Set-ItResult -Inconclusive -Because "NOT IMPLEMENTED"
+            $memoryDump[0] | Should -Be 3500
+            $memoryDump[3] | Should -Be 70
+        }
+
+        It "Computes a complex program without corrupting the memory" {
+            # Arrange
+            $program = ".\complexProgram.txt"
+
+            # Act
+            $memoryDump = Invoke-IntCode -ProgramInputPath $program
+
+            # Assert
+            $memoryDump[0] | Should -Be 337076            
         }
     } 
 }
