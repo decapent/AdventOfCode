@@ -18,21 +18,65 @@ Describe "Given the Advent of Code 2019 - Day 02" {
     }
 
 
-    Context "Part01 - When executing an ADD OpCode " {
-        BeforeAll {
-            $opcodeAdd = Get-Content .\opcodeAdd.txt | ForEach-Object { $_ -split "," }
-            $opcodeMultiply = Get-Content .\opcodeMultiply.txt | ForEach-Object { $_ -split "," }
-            $opcodeTooLong = Get-Content .\opcodeMultiply.txt | ForEach-Object { $_ -split "," }
+    Context "Part01 - When executing an IntCode program " {
+        BeforeEach {
+            $memoryDump = $null
         }
 
-        It "Throws if the first operation is not an Addition" {
-            # Act
-            { Expand-AddOpCode -OpCode $opcodeMultiply } | Should -Throw
+        It "Throws if the program input path is invalid" {
+            # Arrange
+            $invalidPath = ".\doesnotexists"
+
+            # Act & Assert
+            { Invoke-IntCode -ProgramInputPath $invalidPath } | Should -Throw
         }
 
-        It "Throws if the opcode is longer than 4 elements" {
+        It "Throws if the program input is not a file" {
+            # Arrange
+            $validFolderPath = ".\dummyFolder"
+
+            # Act & Assert
+            { Invoke-IntCode -ProgramInputPath $validFolderPath } | Should -Throw
+        }
+
+        It "Throws if the OpCode operation is unrecognised (+, *, exit)" {
+            # Arrange
+            $program = ".\opcodeInvalid.txt"
+
+            # Act & Assert
+            { Invoke-IntCode -ProgramInputPath $program } | Should -Throw
+        }
+
+        It "Computes and addition without corrupting the memory" {
+            # Arrange
+            $program = ".\opcodeAdd.txt"
+
             # Act
-            { Expand-AddOpCode -OpCode $opcodeTooLong } | Should -Throw
+            $memoryDump = Invoke-IntCode -ProgramInputPath $program
+
+            # Assert
+            $memoryDump[0] | Should -Be 2
+        }
+
+        It "Computes a multiplication without corrupting the memory" {
+            # Arrange
+            $program = ".\opcodeMultiply.txt"
+
+            # Act
+            $memoryDump = Invoke-IntCode -ProgramInputPath $program
+
+            # Assert
+            $memoryDump[0] | Should -Be 9
+        }
+
+        It "Computes a simple program without corrupting the memory" {
+            # Arrange
+            $program = ".\simpleProgram.txt"
+
+            # Act
+
+            # Assert
+            Set-ItResult -Inconclusive -Because "NOT IMPLEMENTED"
         }
     } 
 }

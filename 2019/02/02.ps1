@@ -1,54 +1,46 @@
-function global:Expand-AddOpCode {
-    Param(
-        #[ValidateScript({$_[0] -eq "1"})]
-        [string[]]$Opcode,
-
-        [Parameter(ValueFromPipeline)]
-        [ValidateNotNullOrEmpty()]
-        [object[]]$ProgramState
+function global:Invoke-IntCode {
+    [CmdletBinding()]
+    Param (
+        [ValidateScript( { Test-Path $_ -PathType Leaf })]
+        [string]$ProgramInputPath
     )
 
-    Write-Host $Opcode
-    Write-Host $ProgramState
-}
-
-function global:do-stuff {
-
-    $programState = get-content .\test-data\opcodeAdd.txt | ForEach-Object { $_ -split "," }
-
+    Write-Verbose "Loading IntCode in memory"
+    $memory = Get-Content $ProgramInputPath | ForEach-Object { $_ -split "," }
     $currentPos = 0
-    do 
-    {
+    
+    do {
         $shouldRun = $true
 
+        Write-Verbose "Getting new Opcode"
         $seek = $currentPos + 3
-        $opCode = $programState[$currentPos..$seek]
+        $opCode = $memory[$currentPos..$seek]
 
-        Write-Warning "Premier Caractere du Opcode"
-        Write-Host $opCode[0]
-        switch($opCode[0]){
+        Write-Verbose "Obtaining operands"
+        $firstOperand = [int]::Parse($memory[$opCode[1]])
+        $secondOperand = [int]::Parse($memory[$opCode[2]])
+
+        switch ($opCode[0]) {
             "1" {
-                Write-Warning "Je rentre ici"
-                $programState | Expand-AddOpCode -Opcode $opCode
-                # Write-Warning "After"
-                # Write-Host $programState
-                break;
+                Write-Verbose "Executing addition command"
+                $memory[$opCode[4]] = $firstOperand + $secondOperand
             }
-            "2" {
-                "Two"
-                break;
+            "2" {            
+                Write-Verbose "Executing multiplication command"
+                $memory[$opCode[4]] = $firstOperand * $secondOperand
             }
             "99" {
+                Write-Verbose "Time to finish and go home"
                 $shouldRun = $false
-                break;
             }
             default {
-                Write-Host $opCode
-                throw "Unsupported Opcode"
+                throw "Unsupported opCode operation!"
             }
         }
-        
+
         $currentPos += 4
     }
-    while($shouldRun)
+    while ($shouldRun)
+
+    return $memory
 }
