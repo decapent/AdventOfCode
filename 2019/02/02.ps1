@@ -30,7 +30,7 @@ function global:Invoke-IntCode {
     )
 
     Write-Verbose "Loading IntCode in memory"
-    $memory = Get-Content $ProgramInputPath | ForEach-Object { $_ -split "," }
+    $memoryState = Get-Content $ProgramInputPath | ForEach-Object { $_ -split "," }
     
     $shouldRun = $true
     $currentPos = 0
@@ -38,18 +38,18 @@ function global:Invoke-IntCode {
     do {
         Write-Verbose "Getting new Opcode"
         $seek = $currentPos + 3
-        $opCode = $memory[$currentPos..$seek]
+        $opCode = $memoryState[$currentPos..$seek]
 
         if ($opCode[0] -eq "99") {
             $shouldRun = $false
         }
         else {
-            $memory[$opCode[3]] = Expand-OpCode -OpCode $opCode -Memory $memory
+            $memoryState[$opCode[3]] = Expand-OpCode -OpCode $opCode -Memory $memoryState
         }
 
         $currentPos += 4
     }
     while ($shouldRun)
 
-    return $memory
+    return $memoryState
 }
