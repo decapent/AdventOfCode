@@ -19,10 +19,6 @@ Describe "Given the Advent of Code 2019 - Day 02" {
 
 
     Context "Part01 - When executing an IntCode program " {
-        # BeforeEach {
-        #     $memoryDump = $null
-        # }
-
         It "Throws if the program input path is invalid" {
             # Arrange
             $invalidPath = ".\doesnotexists"
@@ -92,4 +88,17 @@ Describe "Given the Advent of Code 2019 - Day 02" {
             $memoryDump[0] | Should -Be 337076            
         }
     } 
+
+    Context "Part02 - When executing an IntCode program " {
+        It "Computes a complex program without corrupting the memory and with modified verb and noun" {
+            # Arrange
+            $program = ".\complexProgramPt2.txt"
+
+            # Act
+            $memoryDump = Invoke-IntCode02 -ProgramInputPath $program
+
+            # Assert
+            $memoryDump[0] | Should -Be 19690720
+        }
+    }
 }

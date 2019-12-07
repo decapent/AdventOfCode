@@ -53,3 +53,35 @@ function global:Invoke-IntCode {
 
     return $memoryState
 }
+
+function global:Invoke-IntCode02 {
+    [CmdletBinding()]
+    Param (
+        [ValidateScript( { $_ | Test-Path -PathType Leaf })]
+        [string]$ProgramInputPath
+    )
+
+    Write-Verbose "Loading IntCode in memory"
+    $memoryState = Get-Content $ProgramInputPath | ForEach-Object { $_ -split "," }
+    
+    $shouldRun = $true
+    $currentPos = 0
+
+    do {
+        Write-Verbose "Getting new Opcode"
+        $seek = $currentPos + 3
+        $opCode = $memoryState[$currentPos..$seek]
+
+        if ($opCode[0] -eq "99") {
+            $shouldRun = $false
+            $currentPos++
+        }
+        else {
+            $memoryState[$opCode[3]] = Expand-OpCode -OpCode $opCode -Memory $memoryState
+            $currentPos += 4
+        }        
+    }
+    while ($shouldRun)
+
+    return $memoryState
+}
