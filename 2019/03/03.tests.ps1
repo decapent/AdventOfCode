@@ -17,7 +17,6 @@ Describe "Given the Advent of Code 2019 - Day 03" {
         Pop-Location
     }
 
-
     Context "Part01 - When resolving the closest intersection between wires " {
         It "Throws if the program input path is invalid" {
             # Arrange
