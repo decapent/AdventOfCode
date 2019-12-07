@@ -10,24 +10,25 @@ function global:Invoke-IntCode {
     
     $shouldRun = $true
     $currentPos = 0
-    
+
     do {
         Write-Verbose "Getting new Opcode"
         $seek = $currentPos + 3
         $opCode = $memory[$currentPos..$seek]
 
+        if($opCode.Length -eq 4 -and $opCode[0] -ne "99") {
+            $firstOperand = [int]::Parse($memory[$opCode[1]])
+            $secondOperand = [int]::Parse($memory[$opCode[2]])
+        }
+
         switch ($opCode[0]) {
             "1" {
                 Write-Verbose "Executing addition command"
-                $firstOperand = [int]::Parse($memory[$opCode[1]])
-                $secondOperand = [int]::Parse($memory[$opCode[2]])
                 $memory[$opCode[3]] = $firstOperand + $secondOperand
                 break;
             }
             "2" {            
                 Write-Verbose "Executing multiplication command"
-                $firstOperand = [int]::Parse($memory[$opCode[1]])
-                $secondOperand = [int]::Parse($memory[$opCode[2]])
                 $memory[$opCode[3]] = $firstOperand * $secondOperand
                 break;
             }
@@ -47,5 +48,3 @@ function global:Invoke-IntCode {
 
     return $memory
 }
-
-Invoke-IntCode -ProgramInputPath .\modifiedInput.txt -Verbose
