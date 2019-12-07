@@ -1,7 +1,31 @@
+function script:Expand-OpCode {
+    Param (
+        [string[]]$OpCode,
+        [string[]]$Memory
+    )
+
+    $firstOperand = [int]::Parse($Memory[$OpCode[1]])
+    $secondOperand = [int]::Parse($Memory[$OpCode[2]])
+
+    switch ($OpCode[0]) {
+        "1" {
+            Write-Verbose "Executing addition command"
+            return $firstOperand + $secondOperand
+        }
+        "2" {            
+            Write-Verbose "Executing multiplication command"
+            return $firstOperand * $secondOperand
+        }
+        default {
+            throw "Unsupported opCode operation!"
+        }
+    }
+}
+
 function global:Invoke-IntCode {
     [CmdletBinding()]
     Param (
-        [ValidateScript({$_ | Test-Path -PathType Leaf })]
+        [ValidateScript( { $_ | Test-Path -PathType Leaf })]
         [string]$ProgramInputPath
     )
 
@@ -16,30 +40,11 @@ function global:Invoke-IntCode {
         $seek = $currentPos + 3
         $opCode = $memory[$currentPos..$seek]
 
-        if($opCode.Length -eq 4 -and $opCode[0] -ne "99") {
-            $firstOperand = [int]::Parse($memory[$opCode[1]])
-            $secondOperand = [int]::Parse($memory[$opCode[2]])
+        if ($opCode[0] -eq "99") {
+            $shouldRun = $false
         }
-
-        switch ($opCode[0]) {
-            "1" {
-                Write-Verbose "Executing addition command"
-                $memory[$opCode[3]] = $firstOperand + $secondOperand
-                break;
-            }
-            "2" {            
-                Write-Verbose "Executing multiplication command"
-                $memory[$opCode[3]] = $firstOperand * $secondOperand
-                break;
-            }
-            "99" {
-                Write-Verbose "Time to finish and go home"
-                $shouldRun = $false
-                break;
-            }
-            default {
-                throw "Unsupported opCode operation!"
-            }
+        else {
+            $memory[$opCode[3]] = Expand-OpCode -OpCode $opCode -Memory $memory
         }
 
         $currentPos += 4
