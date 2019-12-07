@@ -1,7 +1,7 @@
 function global:Invoke-IntCode {
     [CmdletBinding()]
     Param (
-        [ValidateScript( { Test-Path $_ -PathType Leaf })]
+        [ValidateScript({$_ | Test-Path -PathType Leaf })]
         [string]$ProgramInputPath
     )
 
