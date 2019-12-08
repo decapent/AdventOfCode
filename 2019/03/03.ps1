@@ -5,12 +5,13 @@ function global:Resolve-WireIntersection {
         [string]$WireSchemasPath
     )
 
-    Write-Verbose "Parsing raw wire schema into vectors of X and Y coordinate"
+    Write-Verbose "Parsing raw wire schema into vectors of X and Y coordinates"
     $positionVectors = @()
     Get-Content $WireSchemasPath | ForEach-Object {
         $positionVectors += , ($_ | Initialize-PositionVector)
     }   
     
+    Write-Verboe "Obtaining wires"
     $wire1 = $positionVectors[0]
     $wire2 = $positionVectors[1]
     
@@ -20,14 +21,19 @@ function global:Resolve-WireIntersection {
 
     $wire1 | ForEach-Object {
         
+        Write-Verbose "Obtaining first wire segment"
         $line1 = @($wire1LastPos, $_)
         $wire2LastPos = New-WirePosition -X 0 -Y 0
 
         $wire2 | ForEach-Object {
 
+            Write-Verbose "Obtaining second wire segment"
             $line2 = @($wire2LastPos, $_)
+
+            Write-Verbose "Testing for intersection"
             $intersection = Test-WireIntersect -Line1 $line1 -Line2 $line2
             if ($intersection) {
+                Write-Verbose "Found intersection"
                 $intersections += $intersection
             }
 
@@ -37,7 +43,7 @@ function global:Resolve-WireIntersection {
         $wire1LastPos = $_
     }
     
-    # Get closest manhattan distance from the origin
+    Write-Verbose "Resolving closest manhattan distance from origin"
     return ConvertTo-ManhattanDistance -Intersections $intersections -FromOrigin `
     | Sort-Object `
     | Select-Object -First 1
