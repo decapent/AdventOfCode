@@ -43,7 +43,7 @@ function global:Resolve-WireIntersection {
     | Select-Object -First 1
 }
 
-function script:New-WirePosition {
+function global:New-WirePosition {
     Param (
         [int]$X,
         [int]$Y
@@ -53,7 +53,7 @@ function script:New-WirePosition {
     return New-Object -TypeName PSObject -Property $props
 }
 
-function script:Initialize-PositionVector {
+function global:Initialize-PositionVector {
     Param (
         [Parameter(ValueFromPipeline)]
         [string]$WireSchema
@@ -94,12 +94,10 @@ function script:Initialize-PositionVector {
     return $vector
 }
 
-function script:Test-WireIntersect {
+function global:Test-WireIntersect {
     Param (
         [PSObject[]]$Line1,
-        [PSObject[]]$Line2,
-
-        [switch]$DiscardOrigin
+        [PSObject[]]$Line2
     )
 
     # Line 1
@@ -110,27 +108,60 @@ function script:Test-WireIntersect {
     $a2 = $Line2[1].Y - $Line2[0].Y
     $b2 = $Line2[0].X - $Line2[1].X
 
-    $det = $a1 * $b2 - $a2 * $b1
-    if ($det -eq 0) {
+    $delta = $a1 * $b2 - $a2 * $b1
+    if ($delta -eq 0) {
         return $null #Parallel Line
     }
     else {
         $c1 = $a1 * $Line1[0].X + $b1 * $Line1[0].Y
         $c2 = $a2 * $Line2[0].X + $b2 * $Line2[0].Y
 
-        $x = ($b2 * $c1 - $b1 * $c2) / $det
-        $y = ($a1 * $c2 - $a2 * $c1) / $det
+        $x = ($b2 * $c1 - $b1 * $c2) / $delta
+        $y = ($a1 * $c2 - $a2 * $c1) / $delta
 
         # Discard if intersection is at origin
         if ($x -eq 0 -and $y -eq 0) {
             return $null
         }
 
-        return New-WirePosition -X $x -Y $y
+        $intersection = New-WirePosition -X $x -Y $y
+        $intersect1 = $intersection | Assert-PointOnSegment -Line $Line1
+        $intersect2 = $intersection | Assert-PointOnSegment -Line $Line2
+        if ($intersect1 -and $intersect2) {
+            return $intersection
+        }
+
+        # Discard if the intersection found is not on both lines 
+        # but rather on the projection of the line function
+        return $null
     }
 }
 
-function script:ConvertTo-ManhattanDistance {
+function global:Assert-PointOnSegment {
+    Param(
+        [Parameter(ValueFromPipeline)]
+        [PSObject]$Point,
+
+        [PSObject[]]$Line
+    )
+
+    $isBetweenX = $Point.X -ge $Line[0].X -and $Point.X -le $Line[1].X
+    $isBetweenY = $Point.Y -ge $Line[0].Y -and $Point.Y -le $Line[1].Y
+
+    if ($isBetweenX -and !$isBetweenY) {
+        # horizontal crossing vertical shenanigans   
+        return $Point.Y -ge $Line[1].Y -and $Point.Y -le $Line[0].Y
+    }
+
+    if (!$isBetweenX -and $isBetweenY) {
+        # vertical crossing horizontal shenanigans
+        return $Point.X -ge $Line[1].X -and $Point.X -le $Line[0].X
+    }
+
+    return $true
+}
+
+function global:ConvertTo-ManhattanDistance {
     Param (
         [PSObject[]]$Intersections,
 
@@ -144,10 +175,10 @@ function script:ConvertTo-ManhattanDistance {
     $distances = @()
     $Intersections | ForEach-Object {
         if ($FromOrigin.IsPresent) {
-            $distances += [Math]::Abs(0 - ($_.X + $_.Y))
+            $distances += [Math]::Abs($_.X) + [Math]::Abs($_.Y)
         }
         else {
-            $distances += [Math]::Abs(($From.X + $From.Y) - ($_.X + $_.Y))
+            throw "Not implemented"
         }
     }
     
