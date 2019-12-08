@@ -28,10 +28,20 @@ Describe "Given the Advent of Code 2019 - Day 03" {
 
         It "Throws if the program input path is not a file" {
             # Arrange
-            $invalidPath = ".\dummyFolder"
+            $validPathToFolder = ".\dummyFolder"
 
             # Act & Assert
-            { Resolve-WireIntersection -WireSchema $invalidPath } | Should -Throw
+            { Resolve-WireIntersection -WireSchema $validPathToFolder } | Should -Throw
+        }
+
+        It "Calculates the shortest intersection expressed as manhattan distance" {
+            $distance = Resolve-WireIntersection -WireSchema .\distance159.txt
+            $distance | Should -Be 159
+        }
+
+        It "Calculates the shortest intersection expressed as manhattan distance" {
+            $distance = Resolve-WireIntersection -WireSchema .\distance135.txt
+            $distance | Should -Be 135
         }
     }
 }
