@@ -23,7 +23,7 @@ Describe "Given the Advent of Code 2019 - Day 03" {
             $invalidPath = ".\doesnotexists"
 
             # Act & Assert
-            { Resolve-WireIntersection -WireSchema $invalidPath } | Should -Throw
+            { Resolve-WireIntersection -WireSchema $invalidPath -ClosestDistance } | Should -Throw
         }
 
         It "Throws if the program input path is not a file" {
@@ -31,7 +31,7 @@ Describe "Given the Advent of Code 2019 - Day 03" {
             $validPathToFolder = ".\dummyFolder"
 
             # Act & Assert
-            { Resolve-WireIntersection -WireSchema $validPathToFolder } | Should -Throw
+            { Resolve-WireIntersection -WireSchema $validPathToFolder -ClosestDistance } | Should -Throw
         }
 
         It "Detects if two lines are parallel" {
@@ -144,12 +144,50 @@ Describe "Given the Advent of Code 2019 - Day 03" {
 
         It "Resolves simple wire intersections problem" {
             # Act
-            $distance1 = Resolve-WireIntersection -WireSchema .\distance159.txt
-            $distance2 = Resolve-WireIntersection -WireSchema .\distance135.txt
+            $distance1 = Resolve-WireIntersection -WireSchema ".\distance159.txt" -Distance
+            $distance2 = Resolve-WireIntersection -WireSchema ".\distance135.txt" -Distance
 
             # Assert
             $distance1 | Should -Be 159
             $distance2 | Should -Be 135
+        }
+    }
+
+    Context "Part02 - When resolving the steps necessary to an intersection" {
+        It "Calculates the covered steps for a vertical segment from the origin" {
+            # Arrange
+            $pt1 = New-WirePosition -X 0 -Y 0
+            $pt2 = New-WirePosition -X 0 -Y 50
+            $line = @($pt1, $pt2)
+            
+            # Act
+            $steps = Resolve-CoveredSteps -Line $line
+
+            # Assert
+            $steps | Should -Be 50
+        }
+
+        It "Calculates the covered steps for an horizontal segment from the origin" {
+            # Arrange
+            $pt1 = New-WirePosition -X 0 -Y 0
+            $pt2 = New-WirePosition -X 75 -Y 0
+            $line = @($pt1, $pt2)
+            
+            # Act
+            $steps = Resolve-CoveredSteps -Line $line
+
+            # Assert
+            $steps | Should -Be 75
+        }
+
+        It "Resolves simple wire intersections problem" {
+            # Act
+            $distance1 = Resolve-WireIntersection -WireSchema ".\distance159.txt" -LeastSteps
+            $distance2 = Resolve-WireIntersection -WireSchema ".\distance135.txt" -LeastSteps
+
+            # Assert
+            $distance1 | Should -Be 610
+            $distance2 | Should -Be 410
         }
     }
 }

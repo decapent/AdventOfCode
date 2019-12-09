@@ -2,7 +2,10 @@ function global:Resolve-WireIntersection {
     [CmdletBinding()]
     Param (
         [ValidateScript( { $_ | Test-Path -PathType Leaf })]
-        [string]$WireSchemasPath
+        [string]$WireSchemasPath,
+
+        [switch]$Distance,
+        [switch]$LeastSteps
     )
 
     Write-Verbose "Parsing raw wire schema into vectors of X and Y coordinates"
@@ -11,30 +14,41 @@ function global:Resolve-WireIntersection {
         $positionVectors += , ($_ | Initialize-PositionVector)
     }   
     
-    Write-Verboe "Obtaining wires"
+    Write-Verbose "Obtaining wires"
     $wire1 = $positionVectors[0]
     $wire2 = $positionVectors[1]
-    
+    $intersections = @()
+    $steps = @()
+
     # Starting from origin
     $wire1LastPos = New-WirePosition -X 0 -Y 0
-    $intersections = @()
-
+    $wire1Steps = 0
     $wire1 | ForEach-Object {
         
         Write-Verbose "Obtaining first wire segment"
         $line1 = @($wire1LastPos, $_)
-        $wire2LastPos = New-WirePosition -X 0 -Y 0
+        $wire1Steps += Resolve-CoveredSteps -Line $line1
 
+        $wire2LastPos = New-WirePosition -X 0 -Y 0
+        $wire2Steps = 0
         $wire2 | ForEach-Object {
 
             Write-Verbose "Obtaining second wire segment"
             $line2 = @($wire2LastPos, $_)
+            $wire2Steps += Resolve-CoveredSteps -Line $line2
 
             Write-Verbose "Testing for intersection"
             $intersection = Test-WireIntersect -Line1 $line1 -Line2 $line2
             if ($intersection) {
                 Write-Verbose "Found intersection"
                 $intersections += $intersection
+
+                $subLine1 = @($line1[1], $intersection)
+                $subLine2 = @($line2[1], $intersection)
+                $subCover1 = Resolve-CoveredSteps -Line $subLine1
+                $subCover2 = Resolve-CoveredSteps -Line $subLine2
+
+                $steps += ($wire1Steps - $subCover1) + ($wire2Steps - $subCover2)
             }
 
             $wire2LastPos = $_
@@ -43,10 +57,19 @@ function global:Resolve-WireIntersection {
         $wire1LastPos = $_
     }
     
-    Write-Verbose "Resolving closest manhattan distance from origin"
-    return ConvertTo-ManhattanDistance -Intersections $intersections -FromOrigin `
-    | Sort-Object `
-    | Select-Object -First 1
+    if($Distance.IsPresent) {
+        Write-Verbose "Resolving closest manhattan distance from origin"
+        return ConvertTo-ManhattanDistance -Intersections $intersections -FromOrigin `
+        | Sort-Object `
+        | Select-Object -First 1
+    }
+
+    if($LeastSteps.IsPresent) {
+        Write-Verbose "Resolving closest manhattan distance from origin"
+        return $steps `
+        | Sort-Object `
+        | Select-Object -First 1
+    }
 }
 
 function global:New-WirePosition {
@@ -189,4 +212,12 @@ function global:ConvertTo-ManhattanDistance {
     }
     
     return $distances
+}
+
+function global:Resolve-CoveredSteps {
+    Param (
+        [PSObject[]]$Line
+    )
+
+    return [Math]::Abs($Line[0].X - $Line[1].X) + [Math]::Abs($Line[0].Y - $Line[1].Y)
 }
