@@ -5,12 +5,7 @@ Describe "Given the Advent of Code 2019 - Day 04" {
 
         # Source functions
         . $(Resolve-Path ".\04.ps1")
-        
-        # Setting up Test data to Test Drive
-        $testData = Resolve-Path ".\test-data\"
-        Get-ChildItem $testData | Copy-Item -Destination $TestDrive
 
-        # 
         Set-Location $TestDrive
     }
 
@@ -20,18 +15,63 @@ Describe "Given the Advent of Code 2019 - Day 04" {
 
 
     Context "Part01 - When the cracking the password" {
-        BeforeAll {
-            $validInput = "234208-765869"
-            $invalidRangeInput = "12341234"
-            $invalidRangeLengthInput = "1234-1234"
+
+        It "Detects that all digit increases in the password" {
+            # Arrange
+            $password1 = "123434"
+            $password2 = "123456"
+            $password3 = "654321"
+            $password4 = "234455"
+            $password4 = "256555"
+
+            # Act
+            $result1 = Test-DigitsNeverDecrease -Password $password1
+            $result2 = Test-DigitsNeverDecrease -Password $password2
+            $result3 = Test-DigitsNeverDecrease -Password $password3
+            $result4 = Test-DigitsNeverDecrease -Password $password4
+            $result5 = Test-DigitsNeverDecrease -Password $password5
+
+            # Assert
+            $result1 | Should -Be $false
+            $result2 | Should -Be $true
+            $result3 | Should -Be $false
+            $result4 | Should -Be $true
+            $result5 | Should -Be $false
         }
 
-        It "Throws if the input does not contains 2 integers" {
-            { Resolve-Password -Input $invalidRangeInput } | Should -Throw
+        It "Detects that a group of 2 digits are adjacent" {
+            # Arrange
+            $password1 = "122222"
+            $password2 = "123455"
+            $password3 = "112233"
+            $password4 = "237899"
+            $password5 = "123245"
+
+            # Act
+            $result1 = Test-DigitsNeverDecrease -Password $password1
+            $result2 = Test-DigitsNeverDecrease -Password $password2
+            $result3 = Test-DigitsNeverDecrease -Password $password3
+            $result4 = Test-DigitsNeverDecrease -Password $password4
+            $result5 = Test-DigitsNeverDecrease -Password $password5
+
+            # Assert
+            $result1 | Should -Be $true
+            $result2 | Should -Be $true
+            $result3 | Should -Be $true
+            $result4 | Should -Be $true
+            $result5 | Should -Be $false
         }
 
-        It "Throws if the input integers are not of a length 6" {
-            { Resolve-Password -Input $invalidRangeLengthInput } | Should -Throw
+        It "Finds all the valid password given a valid input" {
+            # Arrange
+            $input = "111111-111123"
+
+            # Act
+            $numberOfPasswords = Resolve-AllPassword -Tabarnak $input
+
+            # Assert
+            $numberOfPasswords | Should -Be 11
+
         }
     } 
 
