@@ -23,16 +23,12 @@ function global:Resolve-AllPassword {
     $lastPassword = [int]::Parse($passwordRanges[1])
     while($currentPassword -le $lastPassword) {
         # Check if digit increases in the password
-        if(!Test-DigitsNeverDecrease -Password $currentPassword.ToString()){
-            continue
+        if(Test-DigitsNeverDecrease -Password $currentPassword.ToString()) {
+            if(Test-AdjacentDigits -Password $currentPassword.ToString()) {
+                $validPasswords += $currentPassword
+            }
         }
 
-        # Check if there is adjacent digits in the password
-        if(!Test-AdjacentDigits -Password $currentPassword.ToString()) {
-            continue
-        }
-
-        $validPasswords += $currentPassword
         $currentPassword++
     }
 
@@ -57,12 +53,9 @@ function global:Test-DigitsNeverDecrease {
     $Password.ToCharArray() | ForEach-Object {
         
         $currentDigit = [int]::Parse($_)
-
         $neverDecrease = $previous -le  $currentDigit
         if($neverDecrease) {
             $previous = $currentDigit
-        } else {
-            break   
         }
     }
 
