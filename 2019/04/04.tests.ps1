@@ -64,7 +64,7 @@ Describe "Given the Advent of Code 2019 - Day 04" {
 
         It "Finds all the valid password given a valid input" {
             # Arrange
-            $input = "234208-76586"
+            $input = "234208-765869"
 
             # Act
             $numberOfPasswords = Resolve-AllPassword -Tabarnak $input

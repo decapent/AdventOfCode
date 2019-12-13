@@ -15,7 +15,7 @@ function global:Resolve-AllPassword {
         | Test-DigitsNeverDecrease `
         | Test-AdjacentDigits
 
-        if (![string]::IsNullOrEmpty($currentPassword.ToString($testResult))) {
+        if (![string]::IsNullOrEmpty($testResult)) {
             $validPasswords += $testResult
         }
 
