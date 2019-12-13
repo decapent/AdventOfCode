@@ -1,14 +1,3 @@
-        # [ValidateScript({
-        #     $ranges = $_ -split "-" | ForEach-Object { [int]::Parse($_) }
-        #     if($ranges.Length -ne 2) {
-        #         throw "Invalid input range"
-        #     }
-
-        #     # if($ranges[0].Length -ne 6 -and $ranges[1].Length -ne 6) {
-        #     #     throw "Invalid range length"
-        #     # }
-        # })]
-
 function global:Resolve-AllPassword {
     [CmdletBinding()]
     Param (
@@ -16,17 +5,24 @@ function global:Resolve-AllPassword {
     )
 
     $passwordRanges = $Tabarnak.Split("-")
-
     $validPasswords = @()
 
     $currentPassword = [int]::Parse($passwordRanges[0])
     $lastPassword = [int]::Parse($passwordRanges[1])
-    while($currentPassword -le $lastPassword) {
+    while ($currentPassword -le $lastPassword) {
         # Check if digit increases in the password
-        if(Test-DigitsNeverDecrease -Password $currentPassword.ToString()) {
-            if(Test-AdjacentDigits -Password $currentPassword.ToString()) {
-                $validPasswords += $currentPassword
-            }
+        # if (Test-DigitsNeverDecrease -Password $currentPassword.ToString()) {
+        #     if (Test-AdjacentDigits -Password $currentPassword.ToString()) {
+        #         $validPasswords += $currentPassword
+        #     }
+        # }
+
+        $testResult = $currentPassword.ToString() `
+        | Test-DigitsNeverDecrease `
+        | Test-AdjacentDigits
+
+        if (![string]::IsNullOrEmpty($currentPassword.ToString($testResult))) {
+            $validPasswords += $testResult
         }
 
         $currentPassword++
@@ -37,27 +33,36 @@ function global:Resolve-AllPassword {
 
 function global:Test-AdjacentDigits {
     Param (
+        [OutputType("Password")]
+        [Parameter(ValueFromPipeline)]
         [string]$Password
     )
 
-    return $Password -match "(\d)\1{1}"
+    if (![string]::IsNullOrEmpty($Password)) {
+        for ($i = 0; $i -lt $Password.Length - 1; $i++) {
+            if ($Password[$i] -eq $Password[$i + 1]) {
+                return $Password
+            }
+        }
+    }
+    
+    return [string]::Empty
 }
 
 function global:Test-DigitsNeverDecrease {
     Param (
+        [OutputType("Password")]
+        [Parameter(ValueFromPipeline)]
         [string]$Password
     )
 
-    $previous = 0
-    $neverDecrease = $true
-    $Password.ToCharArray() | ForEach-Object {
-        
-        $currentDigit = [int]::Parse($_)
-        $neverDecrease = $previous -le  $currentDigit
-        if($neverDecrease) {
-            $previous = $currentDigit
+    if (![string]::IsNullOrEmpty($Password)) {
+        for ($i = 0; $i -lt $Password.Length - 1; $i++) {
+            if (!($Password[$i] -le $Password[$i + 1])) {
+                return [string]::Empty
+            }
         }
     }
 
-    return $neverDecrease
+    return $Password
 }

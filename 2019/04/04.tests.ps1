@@ -22,21 +22,21 @@ Describe "Given the Advent of Code 2019 - Day 04" {
             $password2 = "123456"
             $password3 = "654321"
             $password4 = "234455"
-            $password4 = "256555"
+            $password5 = "256555"
 
             # Act
-            $result1 = Test-DigitsNeverDecrease -Password $password1
-            $result2 = Test-DigitsNeverDecrease -Password $password2
-            $result3 = Test-DigitsNeverDecrease -Password $password3
-            $result4 = Test-DigitsNeverDecrease -Password $password4
-            $result5 = Test-DigitsNeverDecrease -Password $password5
+            $result1 = $password1 | Test-DigitsNeverDecrease
+            $result2 = $password2 | Test-DigitsNeverDecrease
+            $result3 = $password3 | Test-DigitsNeverDecrease
+            $result4 = $password4 | Test-DigitsNeverDecrease
+            $result5 = $password5 | Test-DigitsNeverDecrease
 
             # Assert
-            $result1 | Should -Be $false
-            $result2 | Should -Be $true
-            $result3 | Should -Be $false
-            $result4 | Should -Be $true
-            $result5 | Should -Be $false
+            $result1 | Should -Be ''
+            $result2 | Should -Be $password2
+            $result3 | Should -Be ''
+            $result4 | Should -Be $password4
+            $result5 | Should -Be ''
         }
 
         It "Detects that a group of 2 digits are adjacent" {
@@ -48,11 +48,11 @@ Describe "Given the Advent of Code 2019 - Day 04" {
             $password5 = "123245"
 
             # Act
-            $result1 = Test-DigitsNeverDecrease -Password $password1
-            $result2 = Test-DigitsNeverDecrease -Password $password2
-            $result3 = Test-DigitsNeverDecrease -Password $password3
-            $result4 = Test-DigitsNeverDecrease -Password $password4
-            $result5 = Test-DigitsNeverDecrease -Password $password5
+            $result1 = $password1 | Test-AdjacentDigits
+            $result2 = $password2 | Test-AdjacentDigits
+            $result3 = $password3 | Test-AdjacentDigits
+            $result4 = $password4 | Test-AdjacentDigits
+            $result5 = $password5 | Test-AdjacentDigits
 
             # Assert
             $result1 | Should -Be $true
@@ -64,14 +64,13 @@ Describe "Given the Advent of Code 2019 - Day 04" {
 
         It "Finds all the valid password given a valid input" {
             # Arrange
-            $input = "234208-765869"
+            $input = "234208-76586"
 
             # Act
             $numberOfPasswords = Resolve-AllPassword -Tabarnak $input
 
             # Assert
             $numberOfPasswords | Should -Be 11
-
         }
     } 
 
