@@ -55,11 +55,47 @@ Describe "Given the Advent of Code 2019 - Day 04" {
             $result5 = $password5 | Test-AdjacentDigits
 
             # Assert
-            $result1 | Should -Be $true
-            $result2 | Should -Be $true
-            $result3 | Should -Be $true
-            $result4 | Should -Be $true
-            $result5 | Should -Be $false
+            $result1 | Should -Be $password1
+            $result2 | Should -Be $password2
+            $result3 | Should -Be $password3
+            $result4 | Should -Be $password4
+            $result5 | Should -Be ''
+        }
+
+        It "Finds all the valid password given a valid input" {
+            # Arrange
+            # $input = "234208-765869"
+
+            # # Act
+            # $numberOfPasswords = Resolve-AllPassword -Tabarnak $input
+
+            # # Assert
+            # $numberOfPasswords | Should -Be 1246
+        }
+    } 
+
+    Context "Part02 - When cracking the password" {
+        It "Detects that a group no more than 2 digits are adjacent" {
+            # Arrange
+            $password1 = "122222"
+            $password2 = "123455"
+            $password3 = "123444"
+            $password4 = "111122"
+            $password5 = "123245"
+            
+            # Act
+            $result1 = $password1 | Test-AdjacentDigits -Part2
+            $result2 = $password2 | Test-AdjacentDigits -Part2
+            $result3 = $password3 | Test-AdjacentDigits -Part2
+            $result4 = $password4 | Test-AdjacentDigits -Part2
+            $result5 = $password5 | Test-AdjacentDigits -Part2
+            
+            # Assert
+            $result1 | Should -Be ''
+            $result2 | Should -Be $password2
+            $result3 | Should -Be ''
+            $result4 | Should -Be $password4
+            $result5 | Should -Be ''
         }
 
         It "Finds all the valid password given a valid input" {
@@ -67,16 +103,10 @@ Describe "Given the Advent of Code 2019 - Day 04" {
             $input = "234208-765869"
 
             # Act
-            $numberOfPasswords = Resolve-AllPassword -Tabarnak $input
+            $numberOfPasswords = Resolve-AllPassword -Tabarnak $input -Part2
 
             # Assert
-            $numberOfPasswords | Should -Be 11
-        }
-    } 
-
-    Context "Part02 - When the required fuel calculation is computed" {
-        It "WE ALL KNOW THIS COMING" {
-            Set-ItResult -Inconclusive -Because "PART 01 NOT COMPLETED"
+            $numberOfPasswords | Should -Be 0
         }
     }
 }
